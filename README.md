@@ -1,8 +1,8 @@
 # Hidden Markov Model implementation
 
-Python-3 implementation of Forward algorithm  
+Python-3 implementation of HMM class.  
+Also has python function for forward algorithm implementation
 Libraries used are:
-* [Tensorflow](https://github.com/tensorflow/tensorflow)
 * [numpy](http://www.numpy.org/) 
 
 
