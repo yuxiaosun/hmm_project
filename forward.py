@@ -15,7 +15,7 @@ start_probability = np.matrix( '0.6 0.4 ')
 transition_probability = np.matrix('0.7 0.3 ;  0.4 0.6 ')
 emission_probability = np.matrix( '0.5 0.4 0.1 ; 0.1  0.3  0.6 ' )
 
-def my_forward(state,observations,start_prob,em_prob,trans_prob ):
+def forward_algo(state,observations,start_prob,em_prob,trans_prob ):
 
     total_stages = len(observations)
 
