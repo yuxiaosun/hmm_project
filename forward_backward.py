@@ -119,6 +119,35 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
     return new_em_prob
 
 
+def train_transition(start_prob,em_prob,trans_prob,observations):
+    
+    
+    new_trans_prob = np.asmatrix(np.zeros(trans_prob.shape))
+    
+    
+    alpha = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
+    beta = beta_cal(start_probability ,emission_probability,transition_probability,observations)
+    
+    for i in range(trans_prob.shape[0]):
+        
+        for j in range(trans_prob.shape[0]):
+            #print "For %f and %f"%(i,j)
+            
+            interimSum=0            
+            for t in range(len(observations)-1):
+                cost= alpha[i,t]*trans_prob[i,j]*em_prob[j,obs_map[observations[t+1]]]*beta[j,t+1]
+                #print cost
+                interimSum+=cost
+                
+            #print interimSum
+            new_trans_prob[i,j] = interimSum
+                
+                
+            
+    for i in range(trans_prob.shape[0]):
+        new_trans_prob[i,:] = new_trans_prob[i,:]/np.sum(new_trans_prob[i,:])
+        
+    return new_trans_prob
 
 def transition_calculation(delta1,delta2):
     # Sum for all stages, excluding last stage
@@ -192,6 +221,7 @@ z1,z2 = forward_backward(start_probability ,emission_probability,transition_prob
 trans = transition_calculation(z1,z2)
 
 new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
+new_trans_prob = train_transition(start_probability ,emission_probability,transition_probability,observations)
 
 print('===alpha===')
 print(x)
