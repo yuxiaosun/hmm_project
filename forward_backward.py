@@ -71,8 +71,8 @@ def forward_backward(start_prob,em_prob,trans_prob,observations):
     num_states = em_prob.shape[0]
     num_obs = len(observations)
 
-    alpha = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
-    beta = beta_cal(start_probability ,emission_probability,transition_probability,observations)
+    alpha = alpha_cal(start_prob ,em_prob,trans_prob,observations)
+    beta = beta_cal(start_prob ,em_prob,trans_prob,observations)
     
     # Calculate sum [alpha(num_obs)]
     prob_obs_seq = np.sum(alpha[:,num_obs-1])
@@ -149,6 +149,19 @@ def train_transition(start_prob,em_prob,trans_prob,observations):
         
     return new_trans_prob
 
+def train_hmm(start_prob,em_prob,trans_prob,observations,iterations):
+    
+    emProbOld,transProbOld = em_prob,trans_prob
+    
+    for i in range(iterations):
+        em_prob = train_emission(start_prob,emProbOld,transProbOld,observations)
+        trans_prob = train_transition(start_prob,emProbOld,transProbOld,observations)
+        emProbOld,transProbOld = em_prob,trans_prob
+        
+    return em_prob,trans_prob
+
+
+
 def transition_calculation(delta1,delta2):
     # Sum for all stages, excluding last stage
     delta1 = np.asmatrix(delta1)
@@ -220,8 +233,7 @@ y = beta_cal(start_probability ,emission_probability,transition_probability,obse
 z1,z2 = forward_backward(start_probability ,emission_probability,transition_probability,observations)
 trans = transition_calculation(z1,z2)
 
-new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
-new_trans_prob = train_transition(start_probability ,emission_probability,transition_probability,observations)
+
 
 print('===alpha===')
 print(x)
@@ -241,3 +253,15 @@ print('\n===After Training===')
 print(t)
 print(e)
 
+#%%
+########## Training HMM ####################
+
+
+start_prob,em_prob,trans_prob=start_probability,emission_probability,transition_probability
+forward1 = alpha_cal(start_prob,em_prob,trans_prob,observations)
+print "probability of sequence with original parameters : %f"%( np.sum(forward1[:,3]))
+
+num_iter=4
+em_prob1,trans_prob1 = train_hmm(start_prob,em_prob,trans_prob,observations,num_iter)
+forward1 = alpha_cal(start_prob,em_prob1,trans_prob1,observations)
+print "probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3]))
