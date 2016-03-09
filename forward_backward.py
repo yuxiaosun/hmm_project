@@ -77,6 +77,7 @@ def forward_backward(start_prob,em_prob,trans_prob,observations):
     # Calculate sum [alpha(num_obs)]
     prob_obs_seq = np.sum(alpha[:,num_obs-1])
 
+    # each row corresponds to a state
     # Calculate delta1
     delta1 = np.multiply(alpha,beta)/ prob_obs_seq 
 
@@ -105,6 +106,70 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
         selectCols.append([])
     for i in range(len(observations)):
         selectCols[ obs_map[observations[i]] ].append(i)
+<<<<<<< HEAD
+    
+    delta,temp = forward_backward(start_prob,em_prob,trans_prob,observations)
+    
+    totalProb = np.sum(delta,axis=1)
+
+
+    for i in range(em_prob.shape[0]):
+        for j in range(em_prob.shape[1]):
+            new_em_prob[i,j] = np.sum(delta[i,selectCols[j]])/totalProb[i]
+            
+    return new_em_prob
+
+
+
+def transition_calculation(delta1,delta2):
+    # Sum for all stages, excluding last stage
+    delta1 = np.asmatrix(delta1)
+    temp1 = np.sum(delta1[:,:-1],axis=1)
+    # Sum for all stages,
+    temp2 = np.asmatrix(sum(delta2))
+    
+    
+    transition_new = temp2/temp1.transpose()
+    print (temp1)
+    print(temp2)
+     
+    return transition_new
+
+def baum_welch_algo(observations,states,poss_obs):
+
+    num_obs = len(poss_obs)
+    num_states = len(states)
+    a = np.random.random(num_states)
+    a /= a.sum()
+
+    start_probability = a
+
+    transition_probability = np.asmatrix(np.zeros((num_states,num_states)))
+    for i in range(num_states):
+        a = np.random.random(num_states)
+        a /= a.sum()
+        transition_probability[i,:] = a
+        
+            
+    emission_probability = np.asmatrix(np.zeros((num_states,num_obs)))
+    for i in range(num_states):
+        a = np.random.random(num_obs)
+        a /= a.sum()
+        emission_probability[i,:] = a
+
+
+    iterations = 30
+
+    for i in range(iterations):
+
+        delta1,delta2 = forward_backward(start_probability,emission_probability,transition_probability,observations)
+        transition_probability_new = transition_calculation(delta1,delta2)
+        emission_probability = train_emission(start_probability,emission_probability,transition_probability,observations)
+        transition_probability = np.asmatrix(transition_probability_new)
+
+
+    return transition_probability,emission_probability
+=======
     print selectCols
     
     delta = forward_backward(start_prob,em_prob,trans_prob,observations)
@@ -120,6 +185,7 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
 
 #%%
 
+>>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
 # TODO : Complete the below function using above used sub-routines
 # def train_model():
 
@@ -129,13 +195,32 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
 x = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
 y = beta_cal(start_probability ,emission_probability,transition_probability,observations)
 z1,z2 = forward_backward(start_probability ,emission_probability,transition_probability,observations)
-new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
+<<<<<<< HEAD
+trans = transition_calculation(z1,z2)
 
+=======
+new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
+>>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
+
+print('===alpha===')
 print(x)
-print('')
+print('\n===beta===')
 print (y)
-print('')
+print('\n===delta1===')
 print (z1)
-print('\n')
+print('\n===delta2===')
 print (z2)
+<<<<<<< HEAD
+print('\n===transition===')
+print(trans)
+
+
+# t,e =  baum_welch_algo( observations,states,possible_observation)
+# 
+# print('\n===After Training===')
+# print(t)
+# print(e)
+
+=======
 print(new_em_prob)
+>>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
