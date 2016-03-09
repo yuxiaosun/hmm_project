@@ -94,6 +94,32 @@ def forward_backward(start_prob,em_prob,trans_prob,observations):
     return delta1, delta2
 
 
+def train_emission(start_prob,em_prob,trans_prob,observations):
+    
+    
+    new_em_prob = np.asmatrix(np.zeros(em_prob.shape))
+    
+    # Indexing position of unique observations in the observation sequence    
+    selectCols=[]
+    for i in range(em_prob.shape[1]):
+        selectCols.append([])
+    for i in range(len(observations)):
+        selectCols[ obs_map[observations[i]] ].append(i)
+    print selectCols
+    
+    delta = forward_backward(start_prob,em_prob,trans_prob,observations)
+    
+    for i in range(em_prob.shape[0]):
+        totalProb = np.sum(delta[i,:])
+        
+        for j in range(em_prob.shape[1]):
+            
+            new_em_prob[i,j] = np.sum(delta[i,selectCols[j]])/totalProb
+            
+    return new_em_prob
+
+#%%
+
 # TODO : Complete the below function using above used sub-routines
 # def train_model():
 
@@ -103,6 +129,7 @@ def forward_backward(start_prob,em_prob,trans_prob,observations):
 x = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
 y = beta_cal(start_probability ,emission_probability,transition_probability,observations)
 z1,z2 = forward_backward(start_probability ,emission_probability,transition_probability,observations)
+new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
 
 print(x)
 print('')
@@ -111,3 +138,4 @@ print('')
 print (z1)
 print('\n')
 print (z2)
+print(new_em_prob)
