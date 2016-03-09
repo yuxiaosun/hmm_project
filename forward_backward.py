@@ -106,7 +106,6 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
         selectCols.append([])
     for i in range(len(observations)):
         selectCols[ obs_map[observations[i]] ].append(i)
-<<<<<<< HEAD
     
     delta,temp = forward_backward(start_prob,em_prob,trans_prob,observations)
     
@@ -130,8 +129,6 @@ def transition_calculation(delta1,delta2):
     
     
     transition_new = temp2/temp1.transpose()
-    print (temp1)
-    print(temp2)
      
     return transition_new
 
@@ -169,9 +166,7 @@ def baum_welch_algo(observations,states,poss_obs):
 
 
     return transition_probability,emission_probability
-=======
-    print selectCols
-    
+
     delta = forward_backward(start_prob,em_prob,trans_prob,observations)
     
     for i in range(em_prob.shape[0]):
@@ -185,7 +180,6 @@ def baum_welch_algo(observations,states,poss_obs):
 
 #%%
 
->>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
 # TODO : Complete the below function using above used sub-routines
 # def train_model():
 
@@ -195,12 +189,9 @@ def baum_welch_algo(observations,states,poss_obs):
 x = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
 y = beta_cal(start_probability ,emission_probability,transition_probability,observations)
 z1,z2 = forward_backward(start_probability ,emission_probability,transition_probability,observations)
-<<<<<<< HEAD
 trans = transition_calculation(z1,z2)
 
-=======
 new_em_prob = train_emission(start_probability ,emission_probability,transition_probability,observations)
->>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
 
 print('===alpha===')
 print(x)
@@ -210,17 +201,13 @@ print('\n===delta1===')
 print (z1)
 print('\n===delta2===')
 print (z2)
-<<<<<<< HEAD
 print('\n===transition===')
 print(trans)
 
 
-# t,e =  baum_welch_algo( observations,states,possible_observation)
-# 
-# print('\n===After Training===')
-# print(t)
-# print(e)
+t,e =  baum_welch_algo( observations,states,possible_observation)
 
-=======
-print(new_em_prob)
->>>>>>> 9c0de85fb5ddb6ec6acea505ac65f68b2059cb0e
+print('\n===After Training===')
+print(t)
+print(e)
+
