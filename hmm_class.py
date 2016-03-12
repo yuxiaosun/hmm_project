@@ -168,7 +168,7 @@ class hmm:
 
         # Sum the alpha's over the last stage
         total_prob = alpha.sum()
-        return ( observations ,total_prob )
+        return ( total_prob )
 
 
     # ============Forward-Backward=================
@@ -288,19 +288,37 @@ class hmm:
         
         return new_trans_prob
 
-
-    def train_hmm(self,observations,iterations):
+    def train_start_prob(self,observations):
+        delta = self.forward_backward(observations)
+        return delta[:,0].transpose()
+            
+    def train_hmm(self,observation_list,iterations):
 
         emProbNew,transProbNew = self.em_prob,self.trans_prob
-        
+        obs_size = len(observation_list)
+
         # Train the model 'iteration' number of times
         # store em_prob and trans_prob copies since you should use same values for one loop
         for i in range(iterations):
-            emProbNew= self.train_emission(observations)
-            transProbNew = self.train_transition(observations)
-            self.em_prob,self.trans_prob = emProbNew,transProbNew
+
+            wt = [self.forward_algo(observation_list[x]) for x in range(obs_size)]
+            wt = wt/sum(wt)
+            emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
+            transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
+            startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
             
-        return self.em_prob,self.trans_prob
+
+            for j in range(obs_size):
+
+                emProbNew= emProbNew + wt[j] * self.train_emission(observation_list[j])
+                transProbNew = transProbNew + wt[j] * self.train_transition(observation_list[j])
+                startProbNew = startProbNew + wt[j] *self.train_start_prob(observation_list[j])
+                
+
+            self.em_prob,self.trans_prob = emProbNew,transProbNew
+            self.start_prob = startProbNew
+            
+        return self.em_prob, self.trans_prob , self.start_prob
 
     def randomize(observations):
     # Generate random transition,start and emission probabilities
@@ -349,6 +367,12 @@ state_map = { 0 :'s1', 1: 's2' }
 
 # The observations that we observe and feed to the model
 observations = ('R', 'W','B','B')
+obs4 = ('R', 'R','W','B')
+obs3 = ('R', 'B','W','B')
+obs2 = ('R', 'W','B','R')
+
+observation_tuple = []
+observation_tuple.extend( [observations,obs3,obs4,obs2] )
 
 # Numpy arrays of the data
 start_probability = np.matrix( '0.8 0.2 ')
@@ -376,13 +400,19 @@ test = hmm(states,possible_observation,start_probability,transition_probability,
 print (test.viterbi(observations))
 print (test.forward_algo(observations))
 
+print ("")
 
 # start_prob,em_prob,trans_prob=start_probability,emission_probability,transition_probability
 forward1 = test.alpha_cal(observations)
-print "probability of sequence with original parameters : %f"%( np.sum(forward1[:,3]))
-print (forward1)
+print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
 
-num_iter=8
-test.train_hmm(observations,num_iter)
+num_iter=4
+print ("applied Baum welch on")
+print (observation_tuple)
+e,t,s = test.train_hmm(observation_tuple,num_iter)
 forward1 = test.alpha_cal(observations)
-print "probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3]))
+print("parameters emission,transition and start")
+print(e)
+print(t)
+print(s)
+print ("probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3])))
