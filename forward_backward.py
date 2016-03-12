@@ -23,9 +23,8 @@ observations, is a list of strings
 """
 
 def alpha_cal(start_prob,em_prob,trans_prob,observations):
-
-    # Find number of states.stages
     num_states = em_prob.shape[0]
+    # Find number of states.stages
     total_stages = len(observations)
 
     # Initialize values
@@ -46,10 +45,9 @@ def alpha_cal(start_prob,em_prob,trans_prob,observations):
 
 def beta_cal(start_prob,em_prob,trans_prob,observations):
 
-    # Find number of states.stages
     num_states = em_prob.shape[0]
+    # Find number of states.stages
     total_stages = len(observations)
-
     # Initialize values
     ob_ind = obs_map[ observations[total_stages-1] ]
     beta = np.asmatrix(np.zeros((num_states,total_stages)))
@@ -67,7 +65,6 @@ def beta_cal(start_prob,em_prob,trans_prob,observations):
     return beta
 
 def forward_backward(start_prob,em_prob,trans_prob,observations):
-    
     num_states = em_prob.shape[0]
     num_obs = len(observations)
 
@@ -85,8 +82,6 @@ def forward_backward(start_prob,em_prob,trans_prob,observations):
 
 
 def train_emission(start_prob,em_prob,trans_prob,observations):
-    
-    
     new_em_prob = np.asmatrix(np.zeros(em_prob.shape))
     
     # Indexing position of unique observations in the observation sequence    
@@ -108,8 +103,6 @@ def train_emission(start_prob,em_prob,trans_prob,observations):
 
 
 def train_transition(start_prob,em_prob,trans_prob,observations):
-    
-    
     new_trans_prob = np.asmatrix(np.zeros(trans_prob.shape))
     
     alpha = alpha_cal(start_probability ,emission_probability,transition_probability,observations)
@@ -128,7 +121,6 @@ def train_transition(start_prob,em_prob,trans_prob,observations):
 
 
 def train_hmm(start_prob,em_prob,trans_prob,observations,iterations):
-    
     emProbOld,transProbOld = em_prob,trans_prob
     
     for i in range(iterations):
@@ -141,7 +133,6 @@ def train_hmm(start_prob,em_prob,trans_prob,observations,iterations):
 
 # Generae random transition,start and emission probabilities
 def randomize(observations,states,poss_obs):
-
     num_obs = len(poss_obs)
     num_states = len(states)
 
