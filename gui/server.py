@@ -2,7 +2,7 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 import SocketServer
 import os.path
 
-PORT = 8000
+PORT = 7000
 
 
 class MySimpleHTTPRequestHandler(SimpleHTTPRequestHandler):

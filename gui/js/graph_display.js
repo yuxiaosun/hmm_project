@@ -8,6 +8,24 @@ function render_graph_file(filename, layout_width, layout_height){
     render_graph(graph, layout_width, layout_height);
   })
 }
+
+function construct_node(node){
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  node.append('circle')
+    .attr('r', 10);
+  node.append('text')
+    .attr('dy', '.3em')
+    .attr('text-anchor', "middle")
+    .text(function(d) { return d.label; });
+}
+
+function construct_link(link){
+  link.attr('x1', function(d) { return d.source.x; })
+    .attr('y1', function(d) { return d.source.y; })
+    .attr('x2', function(d) { return d.target.x; })
+    .attr('y2', function(d) { return d.target.y; });
+}
+
 function render_graph(graph, layout_width, layout_height){
   var width = layout_width | 400;
   var height = layout_height | 400;
@@ -45,21 +63,8 @@ function render_graph(graph, layout_width, layout_height){
     .attr('class', 'node');
 
   force.on('end', function() {
-
-    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-    node.append('circle')
-      .attr('r', 10);
-    node.append('text')
-      .attr('dy', '.3em')
-      .attr('text-anchor', "middle")
-      .text(function(d) { return d.label; });
-
-    link.attr('x1', function(d) { return d.source.x; })
-      .attr('y1', function(d) { return d.source.y; })
-      .attr('x2', function(d) { return d.target.x; })
-      .attr('y2', function(d) { return d.target.y; });
-
+    construct_node(node);
+    construct_link(link);
     loading.remove();
   });
 }
