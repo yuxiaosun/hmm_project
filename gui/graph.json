@@ -1,7 +1,7 @@
 {
   "nodes": [
-    { "x": 50, "y":  50, "label": "0"},
-    { "x": 100,  "y":  50, "label": "1"}
+    { "x": 50, "y":  50, "label": "Sunny"},
+    { "x": 100,  "y":  50, "label": "Rainy"}
   ],
   "links": [
     { "target": 1, "source":  0 },
