@@ -12,10 +12,10 @@ function render_graph_file(filename, layout_width, layout_height){
 function construct_node(node, params){
   node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   node.append('circle')
-    .attr('r', params.node_radius);
+    .attr('r', 5);
   node.append('text')
-    .attr('dy', '.3em')
-    .attr('text-anchor', "middle")
+    .attr('dy', '-12')
+    .attr('dx', '-1em')
     .text(function(d) { return d.label; });
 }
 
@@ -25,12 +25,18 @@ function construct_link(link, params){
   link.attr("d", function(d) {
     var dx = d.target.x - d.source.x,
         dy = d.target.y - d.source.y,
-        dr = Math.sqrt(dx * dx + dy * dy)/4+30,
-        mx = d.source.x + dx,
-        my = d.source.y + dy;
+        dr = Math.sqrt(dx * dx + dy * dy)/4+100;
+    if(dx == 0 && dy == 0){
+      var sweep = (d.target.x < params.width/2)? 0 : 1;
+      console.log('self node',d.target.x, sweep)
+      return [
+        "M",d.source.x,d.source.y-1,
+        "A",20,20,0,1,sweep,d.target.x,d.target.y+1
+      ].join(" ");
+    }
     return [
       "M",d.source.x,d.source.y,
-      "A",dr,dr,0,0,1,mx,my
+      "A",dr,dr,0,0,1,d.target.x,d.target.y
     ].join(" ");
   });
 }
@@ -51,11 +57,11 @@ function render_graph(graph, layout_width, layout_height){
   var nodes = graph.nodes;
   var links = graph.links;
 
-  var params = {label_max : 0};
 
-  params.label_max = nodes.reduce(function(node1, node2){
-    return Math.max(node1.label.length, node2.label.length);
-  })
+  var params = {width: width, height: height};
+
+  params.label_max = nodes.map(function(node) { return node.label.length; })
+    .reduce(function(a, b) { return Math.max(a,b); });
   params.node_radius = required_radius(params.label_max);
   params.linkDistance = required_edge_length(params.label_max);
 
@@ -63,13 +69,14 @@ function render_graph(graph, layout_width, layout_height){
       .attr('width', width)
       .attr('height', height);
 
+  window.force = force
   var force = d3.layout.force()
       .size([width, height])
       .nodes(nodes)
       .links(links);
 
   force.linkDistance(params.linkDistance)
-    .charge(-100)
+    .charge(-300)
     .start();
 
   var loading = svg.append("text")
@@ -87,8 +94,8 @@ function render_graph(graph, layout_width, layout_height){
     .attr("viewBox", "0 -5 10 10")
     .attr("refX", 15)
     .attr("refY", -1.5)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
+    .attr("markerWidth", 10)
+    .attr("markerHeight", 10)
     .attr("orient", "auto")
   .append("path")
     .attr("d", "M0,-5L10,0L0,5");
@@ -98,12 +105,13 @@ function render_graph(graph, layout_width, layout_height){
     .data(links)
     .enter().append('path')
     .attr('class', 'link')
-    .attr('marker-mid', 'url(#arrow)');
+    .attr('marker-end', 'url(#arrow)');
 
   var node = svg.selectAll('.node')
     .data(nodes)
     .enter().append('g')
-    .attr('class', 'node');
+    .attr('class', 'node')
+    .call(force.drag);
 
   force.on('end', function() {
     construct_node(node, params);
@@ -115,4 +123,4 @@ function render_graph(graph, layout_width, layout_height){
 }
 
 // render_graph(graph)
-render_graph_file('/gui/graph.json')
+// render_graph_file('/gui/graph.json')
