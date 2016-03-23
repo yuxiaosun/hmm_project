@@ -10,7 +10,8 @@ function render_graph_file(filename, layout_width, layout_height){
 }
 
 function construct_node(node, params, text_inside){
-  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("id", function(d) { return "node-"+d.id; });
   if(text_inside){
     node.append('circle')
      .attr('r', params.node_radius);
@@ -31,7 +32,9 @@ function construct_node(node, params, text_inside){
 function construct_link(link, params, curved){
 
   // to curve edges, add arrow at middle
-  link.attr("d", function(d) {
+  link.append("path")
+    .attr('marker-end', 'url(#arrow)')
+    .attr("d", function(d) {
     var dx = d.target.x - d.source.x,
         dy = d.target.y - d.source.y,
         dr = Math.sqrt(dx * dx + dy * dy)/4+100;
@@ -54,7 +57,17 @@ function construct_link(link, params, curved){
         "A",dr,dr,0,0,1,d.target.x,d.target.y
       ].join(" ");
     }
-  });
+  })
+    .attr("id", function(d) { return "edge-path"+d.id; });
+  var text = link.append('text')
+    .attr("text-anchor", "middle")
+    .attr("class", "link-label");
+  text.append('textPath')
+    .attr("xlink:href", function(d) { return "#edge-path"+d.id; })
+    .attr("startOffset", "30%")
+    .text(function(d) { return d.label; })
+  link.attr("id", function(d) { return "edge-"+d.id; });
+
 }
 
 function required_radius(label_length){
@@ -85,12 +98,12 @@ function render_graph(graph, layout_width, layout_height){
       .attr('width', width)
       .attr('height', height);
 
-  window.force = force
   var force = d3.layout.force()
       .size([width, height])
       .nodes(nodes)
       .links(links);
 
+  window.force = force
   force.linkDistance(params.linkDistance)
     .charge(-300)
     .gravity(0.01)
@@ -120,15 +133,13 @@ function render_graph(graph, layout_width, layout_height){
 
   var link = svg.selectAll('.link')
     .data(links)
-    .enter().append('path')
-    .attr('class', 'link')
-    .attr('marker-end', 'url(#arrow)');
+    .enter().append('g')
+    .attr('class', 'link');
 
   var node = svg.selectAll('.node')
     .data(nodes)
     .enter().append('g')
-    .attr('class', 'node')
-    .call(force.drag);
+    .attr('class', 'node');
 
   force.on('end', function() {
     construct_node(node, params);

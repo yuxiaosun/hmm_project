@@ -1,18 +1,14 @@
 {
   "nodes": [
-    { "x": 50, "y":  50, "label": "Sunny"},
-    { "x": 100, "y":  50, "label": "Rainy"},
-    { "x": 75, "y":  100, "label": "Cloudy"}
+    { "x": 100, "y":  100, "label": "State1,t1", "id": 1},
+    { "x": 100, "y":  200, "label": "State2,t1", "id": 2},
+    { "x": 200, "y":  100, "label": "State1,t2", "id": 3},
+    { "x": 200, "y":  200, "label": "State2,t2", "id": 4}
   ],
   "links": [
-    { "target": 1, "source":  0 },
-    { "target": 0, "source":  1 },
-    { "target": 0, "source":  2 },
-    { "target": 2, "source":  1 },
-    { "target": 2, "source":  0 },
-    { "target": 1, "source":  2 },
-    { "target": 1, "source":  1 },
-    { "target": 0, "source":  0 },
-    { "target": 2, "source":  2 }
+    { "target": 2, "source":  0 , "label": "e11", "id": 1},
+    { "target": 3, "source":  0 , "label": "e12", "id": 2},
+    { "target": 2, "source":  1 , "label": "e21", "id": 3},
+    { "target": 3, "source":  1 , "label": "e22", "id": 4}
   ]
 }
