@@ -9,17 +9,26 @@ function render_graph_file(filename, layout_width, layout_height){
   })
 }
 
-function construct_node(node, params){
+function construct_node(node, params, text_inside){
   node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-  node.append('circle')
-    .attr('r', 5);
-  node.append('text')
-    .attr('dy', '-12')
-    .attr('dx', '-1em')
-    .text(function(d) { return d.label; });
+  if(text_inside){
+    node.append('circle')
+     .attr('r', params.node_radius);
+    node.append('text')
+      .attr('dy', '.3em')
+      .attr('text-anchor', "middle")
+      .text(function(d) { return d.label; });
+  } else {
+    node.append('circle')
+     .attr('r', 10);
+    node.append('text')
+      .attr('dy', '-12')
+      .attr('dx', "-11")
+      .text(function(d) { return d.label; });
+  }
 }
 
-function construct_link(link, params){
+function construct_link(link, params, curved){
 
   // to curve edges, add arrow at middle
   link.attr("d", function(d) {
@@ -34,10 +43,17 @@ function construct_link(link, params){
         "A",20,20,0,1,sweep,d.target.x,d.target.y+1
       ].join(" ");
     }
-    return [
-      "M",d.source.x,d.source.y,
-      "A",dr,dr,0,0,1,d.target.x,d.target.y
-    ].join(" ");
+    if(!curved){
+      return [
+        "M",d.source.x,d.source.y,
+        "L",d.target.x,d.target.y
+      ].join(" ");
+    } else {
+      return [
+        "M",d.source.x,d.source.y,
+        "A",dr,dr,0,0,1,d.target.x,d.target.y
+      ].join(" ");
+    }
   });
 }
 
@@ -77,6 +93,7 @@ function render_graph(graph, layout_width, layout_height){
 
   force.linkDistance(params.linkDistance)
     .charge(-300)
+    .gravity(0.01)
     .start();
 
   var loading = svg.append("text")
