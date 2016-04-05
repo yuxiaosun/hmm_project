@@ -3,12 +3,13 @@ class  continuoushmm():
     for looping over observations t iterator is used
     for looping over clusterms  k is used
     """
-    def __init__(self,n,m,p=1,a,means,covars,g,pi):
-        self.p=
+    def __init__(self,n,m,p,a,means,covars,g,start_prob):
+        self.p=p
         self.a=a
         self.means=means
         self.covars=covars
         self.g=g
+        self.pi=start_prob
 
     def gaamamixcal(self,alpha,beta,observations):
         self.gaamamix= numpy.zeros( (len(observations), self.n, self.m) )
@@ -51,9 +52,9 @@ class  continuoushmm():
 
     def _gaussianpdf(self,mean,covarmatrix,observation):
         covar_det = numpy.linalg.det(covarmatrix)
-         c =  (2.0*numpy.pi)**(float(self.p/2.0)) * (covar_det)**(0.5)
-         c=1/c
-         pdfval = c * numpy.exp(-0.5 * numpy.dot( numpy.dot((observation-mean),covarmatrix.I), (observation-mean)) )
+        c =  (2.0*numpy.pi)**(float(self.p/2.0)) * (covar_det)**(0.5)
+        c=1/c
+        pdfval = c * numpy.exp(-0.5 * numpy.dot( numpy.dot((observation-mean),covarmatrix.I), (observation-mean)) )
 
 
         #calucaltion of gaaussian mixture pdf
@@ -65,7 +66,7 @@ class  continuoushmm():
         self.new_meansmatrix=numpy.zeros( (self.n,self.m,self.p) )
         self.new_covarsmatrix=[[numpy.matrix(numpy.zeros(self.p,self.p)) for k in xrange(self.m)]for j in xrange(self.n)]
         for j in xrange(self.n):
-            for k in x range(self.m):
+            for k in xrange(self.m):
                 term1=0
                 term2=0
                 for t in xrange(len(observations)):
@@ -77,56 +78,3 @@ class  continuoushmm():
                 self.new_gmatrix[j][k]=term1/term2
                 self.meansmatrix[j][k]=term3/term1
                 self.new_covarsmatrix[j][k]=term4/term1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def gmatrixcal():
-
-
-
-
-
-
-    def sigmamatrixcal():
-
-
-
-
-
-
-
-
-    def meancal():
-
-
-
-
-
-    def kernelvalues():
