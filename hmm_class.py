@@ -159,7 +159,6 @@ class hmm:
     
 
     def forward_algo(self,observations):
-
         # Store total number of observations
         total_stages = len(observations)
 
