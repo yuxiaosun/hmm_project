@@ -11,6 +11,13 @@ class  continuoushmm():
         self.g=g
         self.pi=start_prob
 
+    def initialize(self):
+        self.pi= numpy.ones( (self.n) )* (1/self.n)
+        self.a = numpy.ones((self.n,self.n))* (1/self.n)
+        self.mean = numpy.ones( numpy.zeros( (self.n,self.m,self.p) ) )
+        self.covars= [ [numpy.ones(self.p,self.p) for k in xrange(self.m) ] for j in xrange(self.n) ]
+
+
     def gaamamixcal(self,alpha,beta,observations):
         self.gaamamix= numpy.zeros( (len(observations), self.n, self.m) )
         gaama=self._gaamacal(alpha,beta)
@@ -21,7 +28,7 @@ class  continuoushmm():
                 for k in xrange(self.m):
                     numer=g[j][k]*self.kernerlvalues[j][k][t]
                     for kk in range(self.m):
-                        denom=denom+g[j][kk]*self.kernerlvalues[j][kkk][t]
+                        denom=denom+g[j][kk]*self.kernerlvalues[j][kk][t]
                     term2= numer/denom
                     gaamamix[t][j][k]= gaama[j][t]*term2
         return self.gaamamix
@@ -78,3 +85,13 @@ class  continuoushmm():
                 self.new_gmatrix[j][k]=term1/term2
                 self.meansmatrix[j][k]=term3/term1
                 self.new_covarsmatrix[j][k]=term4/term1
+
+    def emissionprobcal(self):
+        self.b= numpy.zeros( (self.n,len(observations)) )
+        for j in xrange(self.n):
+            for t in xrange(len(observations)):
+                bjt=0
+                for k in xrange( self.m ):
+                    bjt=bjt+self.g[j][k]*self.kernelvalues[j][k][t]
+                b[j][k]=bjk
+        return self.b
