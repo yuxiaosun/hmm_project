@@ -93,5 +93,5 @@ class  continuoushmm():
                 bjt=0
                 for k in xrange( self.m ):
                     bjt=bjt+self.g[j][k]*self.kernelvalues[j][k][t]
-                b[j][k]=bjk
+                b[j][t]=bjt
         return self.b
