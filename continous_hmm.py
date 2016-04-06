@@ -1,21 +1,29 @@
+import numpy
+
 class  continuoushmm():
     """for looping over states j iterator is used
     for looping over observations t iterator is used
     for looping over clusterms  k is used
     """
-    def __init__(self,n,m,p,a,means,covars,g,start_prob):
+    def __init__(self,n,m,p,a=None,means=None,covars=None,g=None,start_prob=None,uniform_initialize=False):
+        self.n=n
+        self.m=m
         self.p=p
         self.a=a
         self.means=means
         self.covars=covars
         self.g=g
         self.pi=start_prob
+        if uniform_initialize:
+            self.initialize()
+
 
     def initialize(self):
         self.pi= numpy.ones( (self.n) )* (1/self.n)
         self.a = numpy.ones((self.n,self.n))* (1/self.n)
-        self.mean = numpy.ones( numpy.zeros( (self.n,self.m,self.p) ) )
-        self.covars= [ [numpy.ones(self.p,self.p) for k in xrange(self.m) ] for j in xrange(self.n) ]
+        self.mean =  numpy.zeros( (self.n,self.m,self.p) )
+        self.covars= [[ numpy.matrix(numpy.ones((self.p,self.p))) for k in xrange(self.m)] for j in xrange(self.n)]
+        self.g= numpy.ones ( (self.n,self.m))*1/self.m
 
 
     def gaamamixcal(self,alpha,beta,observations):
@@ -83,7 +91,7 @@ class  continuoushmm():
                     for kk in xrange(self.m):
                         term2=term2+self.gaamamix[j][kk][t]
                 self.new_gmatrix[j][k]=term1/term2
-                self.meansmatrix[j][k]=term3/term1
+                self.new_meansmatrix[j][k]=term3/term1
                 self.new_covarsmatrix[j][k]=term4/term1
 
     def emissionprobcal(self):
@@ -95,3 +103,5 @@ class  continuoushmm():
                     bjt=bjt+self.g[j][k]*self.kernelvalues[j][k][t]
                 b[j][t]=bjt
         return self.b
+
+hmm=continuoushmm(n=6,m=8,p=4,uniform_initialize=True)
