@@ -82,7 +82,20 @@ class hmm:
         if (summation[0,0]!=1):
             raise ValueError("Probabilities entered for start state are invalid")
 
+    # ================ Generate Obs_map ===================
+
+    def generate_obs_map(self):
+        self.obs_map = {}
+        for i,o in enumerate(self.observations):
+            self.obs_map[o] = i
+    
     # ================ Forward algo===================
+    """
+    Function returns the probability of an observation sequence
+    Function makes assumption that order of states is same in state,start_prob,em_prob,trans_prob
+    start_prob,em_prob,trans_prob are numpy objects
+    """
+
     def forward_algo(self,observations):
         # Store total number of observations
         total_stages = len(observations)
@@ -103,14 +116,71 @@ class hmm:
         total_prob = alpha.sum()
         return ( total_prob )
 
-    # ================ Generate Obs_map ===================
 
-    def generate_obs_map(self):
-        self.obs_map = {}
-        for i,o in enumerate(self.observations):
-            self.obs_map[o] = i
+    # ================Viterbi ===================
+    """
+    Function returns the most likely path, and its associated probability
+    Function makes assumption that order of states is same in state,start_prob,em_prob,trans_prob
+    start_prob,em_prob,trans_prob are numpy objects
+    """
+
+    def viterbi(self,observations):
+        # Find total states,observations
+        total_stages = len(observations)
+        num_states = len(self.states)
+
+        # initialize data
+        # Path stores the state sequence giving maximum probability
+        old_path = np.zeros( (total_stages, num_states) )
+        new_path = np.zeros( (total_stages, num_states) )
+
+        # Find initial delta
+        # Map observation to an index
+        # delta[s] stores the probability of most probable path ending in state 's' 
+        ob_ind = self.obs_map[ observations[0] ]
+        delta = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
+         
+        # initialize path
+        old_path[0,:] = [i for i in range(num_states) ]
+        
+        # Find delta[t][x] for each state 'x' at the iteration 't'
+        # delta[t][x] can be found using delta[t-1][x] and taking the maximum possible path
+        for curr_t in range(1,total_stages):
+
+            # Map observation to an index
+            ob_ind = self.obs_map[ observations[curr_t] ]
+            # Find temp and take max along each row to get delta
+            temp  =  np.multiply (np.multiply(delta , self.trans_prob.transpose()) , self.em_prob[:, ob_ind] )
+                
+            # Update delta
+            delta = temp.max(axis = 1).transpose()
+
+            # Find state which is most probable using argax
+            # Convert to a list for easier processing
+            max_temp = temp.argmax(axis=1).transpose()
+            max_temp = np.ravel(max_temp).tolist()
+
+            # Update path
+            for s in range(num_states):
+                new_path[:curr_t,s] = old_path[0:curr_t, max_temp[s] ] 
+
+            new_path[curr_t,:] = [i for i in range(num_states) ]
+            old_path = new_path.copy()
+
+
+        # Find the state in last stage, giving maximum probability
+        final_max = np.argmax(np.ravel(delta))
+        best_path = old_path[:,final_max].tolist()
+        best_path_map = [ state_map[i] for i in best_path]
+
+        return best_path_map, delta[0,final_max]
 
     # ================ Baum Welch ===================
+
+    """
+    Function trains start,emission and transition probabilities for a given set of obervation sequence
+    Uses the forward-backward method(principle of expectation maximization_
+    """
 
     def alpha_cal(self,observations):
         # Calculate alpha matrix and return it
@@ -139,7 +209,6 @@ class hmm:
 
         # return the computed alpha
         return (alpha,c_scale)
-
 
     def beta_cal(self,observations,c_scale):
 
@@ -184,7 +253,6 @@ class hmm:
 
         return delta1
 
-
     def train_emission(self,observations):
         # Initialize matrix
         new_em_prob = np.asmatrix(np.zeros(self.em_prob.shape))
@@ -207,7 +275,6 @@ class hmm:
             for j in range(self.em_prob.shape[1]):
                 new_em_prob[i,j] = np.sum(delta[i,selectCols[j]])/totalProb[i]
         return new_em_prob
-
  
     def train_transition(self,observations):
         # Initialize transition matrix
@@ -228,7 +295,6 @@ class hmm:
             new_trans_prob[i,:] = new_trans_prob[i,:]/np.sum(new_trans_prob[i,:])
         
         return new_trans_prob
-
 
     def train_start_prob(self,observations):
         delta = self.forward_backward(observations)
