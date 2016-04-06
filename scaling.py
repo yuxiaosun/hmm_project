@@ -94,6 +94,9 @@ class hmm:
     Function returns the probability of an observation sequence
     Function makes assumption that order of states is same in state,start_prob,em_prob,trans_prob
     start_prob,em_prob,trans_prob are numpy objects
+
+    No scaling applied here
+    Use alpha_cal function if you require probabiliites with scaling
     """
 
     def forward_algo(self,observations):
@@ -139,6 +142,9 @@ class hmm:
         # delta[s] stores the probability of most probable path ending in state 's' 
         ob_ind = self.obs_map[ observations[0] ]
         delta = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
+
+        # Scale delta
+        delta = delta /np.sum(delta)
          
         # initialize path
         old_path[0,:] = [i for i in range(num_states) ]
@@ -152,8 +158,9 @@ class hmm:
             # Find temp and take max along each row to get delta
             temp  =  np.multiply (np.multiply(delta , self.trans_prob.transpose()) , self.em_prob[:, ob_ind] )
                 
-            # Update delta
+            # Update delta and scale it
             delta = temp.max(axis = 1).transpose()
+            delta = delta /np.sum(delta)
 
             # Find state which is most probable using argax
             # Convert to a list for easier processing
@@ -173,7 +180,7 @@ class hmm:
         best_path = old_path[:,final_max].tolist()
         best_path_map = [ state_map[i] for i in best_path]
 
-        return best_path_map, delta[0,final_max]
+        return best_path_map
 
     # ================ Baum Welch ===================
 
@@ -425,7 +432,9 @@ print (observation_tuple)
 e,t,s = test.train_hmm(observation_tuple,num_iter,quantities_observations)
 print("parameters emission,transition and start")
 print(e)
+print("")
 print(t)
+print("")
 print(s)
 
 prob = test.log_prob(observation_tuple, quantities_observations)
