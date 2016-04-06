@@ -300,31 +300,30 @@ class hmm:
         delta = self.forward_backward(observations)
         return delta[:,0].transpose()
             
-    def train_hmm(self,observation_list,iterations):
+    def train_hmm(self,observations,iterations):
 
-        emProbNew,transProbNew = self.em_prob,self.trans_prob
-        obs_size = len(observation_list)
+        eps = 0.001
+
+        emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
+        transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
+        startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
+        prob = - float('inf')
 
         # Train the model 'iteration' number of times
         # store em_prob and trans_prob copies since you should use same values for one loop
         for i in range(iterations):
 
-            wt = [self.forward_algo(observation_list[x]) for x in range(obs_size)]
-            wt = wt/sum(wt)
-            emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
-            transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
-            startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
-            
-
-            for j in range(obs_size):
-
-                emProbNew= emProbNew + wt[j] * self.train_emission(observation_list[j])
-                transProbNew = transProbNew + wt[j] * self.train_transition(observation_list[j])
-                startProbNew = startProbNew + wt[j] *self.train_start_prob(observation_list[j])
-                
+            emProbNew= self.train_emission(observations)
+            transProbNew = self.train_transition(observations)
+            startProbNew = self.train_start_prob(observations)
 
             self.em_prob,self.trans_prob = emProbNew,transProbNew
             self.start_prob = startProbNew
+
+            if(self.forward_algo(observations) - prob)>eps:
+                prob = self.forward_algo(observations)
+            else:
+                break
             
         return self.em_prob, self.trans_prob , self.start_prob
 
@@ -378,8 +377,6 @@ obs4 = ('R', 'R','W','B')
 obs3 = ('R', 'B','W','B')
 obs2 = ('R', 'W','B','R')
 
-observation_tuple = []
-observation_tuple.extend( [observations,obs3,obs4,obs2] )
 
 # Numpy arrays of the data
 start_probability = np.matrix( '0.8 0.2 ')
@@ -414,8 +411,8 @@ print ("probability of sequence with original parameters : %f"%( np.sum(forward1
 
 num_iter=4
 print ("applied Baum welch on")
-print (observation_tuple)
-e,t,s = test.train_hmm(observation_tuple,num_iter)
+print (observations)
+e,t,s = test.train_hmm(observations,num_iter)
 forward1 = test.alpha_cal(observations)
 print("parameters emission,transition and start")
 print(e)
