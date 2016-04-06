@@ -1,5 +1,6 @@
 import numpy as np
 
+# States
 states = ('s1', 's2')
 
 #list of possible observations

@@ -209,7 +209,6 @@ class hmm:
         # return the computed alpha
         return alpha 
 
-
     def beta_cal(self,observations):
     # Calculate Beta maxtrix
 
@@ -232,7 +231,6 @@ class hmm:
         # return the computed beta
         return beta
 
-
     def forward_backward(self,observations):
         num_states = self.em_prob.shape[0]
         num_obs = len(observations)
@@ -250,7 +248,6 @@ class hmm:
         delta1 = np.multiply(alpha,beta)/ prob_obs_seq 
 
         return delta1
-
 
     def train_emission(self,observations):
         # Initialize matrix
@@ -274,7 +271,6 @@ class hmm:
             for j in range(self.em_prob.shape[1]):
                 new_em_prob[i,j] = np.sum(delta[i,selectCols[j]])/totalProb[i]
         return new_em_prob
-
 
     def train_transition(self,observations):
         # Initialize transition matrix
@@ -302,7 +298,7 @@ class hmm:
             
     def train_hmm(self,observation_list,iterations):
 
-        emProbNew,transProbNew = self.em_prob,self.trans_prob
+        #  emProbNew,transProbNew = self.em_prob,self.trans_prob
         obs_size = len(observation_list)
 
         # Train the model 'iteration' number of times
@@ -311,6 +307,7 @@ class hmm:
 
             wt = [self.forward_algo(observation_list[x]) for x in range(obs_size)]
             wt = wt/sum(wt)
+
             emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
             transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
             startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
@@ -374,9 +371,9 @@ state_map = { 0 :'s1', 1: 's2' }
 
 # The observations that we observe and feed to the model
 observations = ('R', 'W','B','B')
-obs4 = ('R', 'R','W','B')
+obs4 = ('W', 'R','W','B')
 obs3 = ('R', 'B','W','B')
-obs2 = ('R', 'W','B','R')
+obs2 = ('B', 'W','B','R')
 
 observation_tuple = []
 observation_tuple.extend( [observations,obs3,obs4,obs2] )
@@ -412,7 +409,7 @@ print ("")
 forward1 = test.alpha_cal(observations)
 print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
 
-num_iter=4
+num_iter=40
 print ("applied Baum welch on")
 print (observation_tuple)
 e,t,s = test.train_hmm(observation_tuple,num_iter)
