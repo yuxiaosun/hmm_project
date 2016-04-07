@@ -5,9 +5,6 @@ import numpy as np
 import scipy.stats as stats
 from sklearn.cluster import KMeans
 hmm=continuoushmm(n=6,m=8,p=4,uniform_initialize=True)
-print hmm.g
-alpha=np.ones( (6,25))*1/25
-beta=np.ones( (6,25) )*1/25
 traindata=pd.read_csv("test.csv")
 observations=traindata.ix[:,2:6]
 observations=observations.as_matrix()
@@ -19,4 +16,6 @@ for j in xrange(6):
     for k in xrange(8):
         Mumatrix[j][k]=Mujk[k]
 hmm.meansmatrix=Mumatrix
-hmm.gaamamixcal(alpha,beta,observations)
+hmm.update_model(observations)
+#print hmm.new_meansmatrix
+#print hmm.new_covarsmatrix
