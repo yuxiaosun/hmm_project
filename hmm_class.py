@@ -13,6 +13,8 @@ class hmm:
         self.em_prob = em_prob
 
         self.generate_obs_map()
+        self.generate_state_map()
+        print self.state_map
 
         # Raise error if it is wrong data-type
         if(type(self.em_prob) != np.matrixlib.defmatrix.matrix):
@@ -84,6 +86,13 @@ class hmm:
         if (summation[0,0]!=1):
             raise ValueError("Probabilities entered for start state are invalid")
 
+    # ================ Generate state_map ===================
+
+    def generate_state_map(self):
+        self.state_map = {}
+        for i,o in enumerate(self.states):
+            self.state_map[i] = o
+
     # ================ Generate Obs_map ===================
 
     def generate_obs_map(self):
@@ -146,7 +155,7 @@ class hmm:
         # Find the state in last stage, giving maximum probability
         final_max = np.argmax(np.ravel(delta))
         best_path = old_path[:,final_max].tolist()
-        best_path_map = [ state_map[i] for i in best_path]
+        best_path_map = [ self.state_map[i] for i in best_path]
 
         return best_path_map, delta[0,final_max]
 
@@ -370,7 +379,6 @@ def test():
     #list of possible observations
     possible_observation = ('R','W', 'B')
 
-    state_map = { 0 :'s1', 1: 's2' }
 
     # The observations that we observe and feed to the model
     observations = ('R', 'W','B','B')
@@ -420,3 +428,4 @@ def test():
     print(t)
     print(s)
     print ("probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3])))
+
