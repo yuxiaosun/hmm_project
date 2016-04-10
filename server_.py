@@ -7,7 +7,7 @@ import numpy as np
 
 @app.route('/graph')
 def graph():
-    print url_for('static', filename='js/graph_display.js')
+    # print url_for('static', filename='/js/graph_display.js')
     return render_template('graph.html')
 
 
@@ -39,7 +39,8 @@ def viterbi():
                         parse_2d_array(request.form['start_probability']),
                         parse_2d_array(request.form['transition_probability']),
                         parse_2d_array(request.form['emission_probability']))
-    print (hmm.viterbi(request.form['observations']))
+    print hmm.obs_map
+    print (hmm.viterbi(parse_1d_array(request.form['possible_observations'])))
     return str(request.form)
 
 
