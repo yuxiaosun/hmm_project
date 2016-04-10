@@ -28,20 +28,20 @@ def parse_1d_array(string):
 
 @app.route('/run/viterbi', methods=['GET', 'POST'])
 def viterbi():
-    print(parse_1d_array(request.form['states']),
-          parse_1d_array(request.form['possible_observations']),
-          parse_2d_array(request.form['start_probability']),
-          parse_2d_array(request.form['transition_probability']),
-          parse_2d_array(request.form['emission_probability']))
+    # print(parse_1d_array(request.form['states']),
+    #       parse_1d_array(request.form['possible_observations']),
+    #       parse_2d_array(request.form['start_probability']),
+    #       parse_2d_array(request.form['transition_probability']),
+    #       parse_2d_array(request.form['emission_probability']))
 
     hmm = hmm_class.hmm(parse_1d_array(request.form['states']),
                         parse_1d_array(request.form['possible_observations']),
                         parse_2d_array(request.form['start_probability']),
                         parse_2d_array(request.form['transition_probability']),
                         parse_2d_array(request.form['emission_probability']))
-    print hmm.obs_map
-    print (hmm.viterbi(parse_1d_array(request.form['possible_observations'])))
-    return str(request.form)
+    obs = parse_1d_array(request.form['possible_observations'])
+    best_path, prob = hmm.viterbi(obs)
+    return ("Most probable sequence: %s <br/> Probability: %f" % (','.join(best_path), prob))
 
 
 if __name__ == '__main__':
