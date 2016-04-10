@@ -8,11 +8,11 @@
         <title>Hidden Markov Model</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/static/font-awesome/css/font-awesome.min.css" />
 
-        <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+        <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
 
     </head>
 
@@ -31,7 +31,7 @@
     }
 
     </style>
-    
+
     <script type="text/javascript">
 
         function showoutput() {
@@ -40,7 +40,7 @@
             }
 
     </script>
-  
+
     <body>
 
         <div class="container">
@@ -53,7 +53,7 @@
 
                 <div class="row">
 
-                    <form role="form">
+                    <form role="form" method="POST" action="/run/viterbi">
 
                         <div class="col-lg-6 border-right">
 
@@ -62,38 +62,49 @@
                             <div class="form-group" >
                                 <label for="states">Enter states</label>
                                 <div class="input-group">
-                                    <textarea rows="2" type="text" class="form-control" id="states" placeholder="('Healthy', 'Fever')" required></textarea>
+                                    <textarea rows="2" type="text" class="form-control" name="states" placeholder="Healthy Fever" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="observations">Enter possible observations</label>
+                                <div class="input-group">
+                                    <textarea rows="2" type="text" class="form-control" name="possible_observations" placeholder="normal cold dizzy" required></textarea>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="observations">Enter observations</label>
                                 <div class="input-group">
-                                    <textarea rows="2" type="text" class="form-control" id="observations" placeholder="('normal', 'cold','dizzy')" required></textarea>
+                                    <textarea rows="2" type="text" class="form-control" name="observations" placeholder="normal cold dizzy" required></textarea>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="start_probability">Enter start probability vector</label>
                                 <div class="input-group">
-                                    <textarea rows="2" type="text" class="form-control" id="start_probability" placeholder="'0.6 0.4 '" required></textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="emission_probability">Enter emission probability matrix</label>
-                                <div class="input-group">
-                                    <textarea rows="2" type="text" class="form-control" id="emission_probability" placeholder="'0.7 0.3 ;  0.4 0.6 '" required></textarea>
+                                    <textarea rows="2" type="text" class="form-control" name="start_probability" placeholder="'0.6 0.4 '" required></textarea>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="transition_probability">Enter transition probability matrix</label>
                                 <div class="input-group">
-                                    <textarea rows="2" class="form-control" id="transition_probability" placeholder="'0.5 0.4 0.1 ; 0.1  0.3  0.6 '" required></textarea>
+                                    <textarea name="transition_probability" rows="2" class="form-control" id="transition_probability" placeholder="'0.7 0.3 ;  0.4 0.6 '" required></textarea>
                                 </div>
                             </div>
-                            
+
+                            <div class="form-group">
+                                <label for="emission_probability">Enter emission probability matrix</label>
+                                <div class="input-group">
+                                    <textarea rows="2" type="text" class="form-control" name="emission_probability" placeholder="'0.5 0.4 0.1 ; 0.1  0.3  0.6 '" required></textarea>
+                                </div>
+                            </div>
+
+
+                            <div style="text-align: center;">
+                                <input type="submit" name="submit" id="submit" value="Submit" onclick="showoutput()" class="btn btn-success">
+                            </div>
                         </div>
 
                     </form>
@@ -122,9 +133,9 @@
                                 <div class="alert alert-success">
                                     <span class="glyphicon glyphicon-file"></span><strong>&nbsp;Output</strong>
                                 </div>
-                                <form method="get" action="output.txt">
+                                <form method="get" action="static/output.txt">
                                     <input type="submit" value="View output file" class="btn btn-success">
-                                </form> 
+                                </form>
                             </div>
 
                         </div>
