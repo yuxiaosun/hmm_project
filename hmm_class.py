@@ -13,6 +13,7 @@ class hmm:
         self.em_prob = em_prob
 
         self.generate_obs_map()
+        self.generate_state_map()
         
         # Raise error if it is wrong data-type
         if(type(self.em_prob) != np.matrixlib.defmatrix.matrix):
@@ -84,6 +85,13 @@ class hmm:
         if (summation[0,0]!=1):
             raise ValueError("Probabilities entered for start state are invalid")
 
+    # ================ Generate State_map ===================
+
+    def generate_state_map(self):
+        self.state_map = {}
+        for i,s in enumerate(self.states):
+            self.state_map[s] = i
+
     # ================ Generate Obs_map ===================
 
     def generate_obs_map(self):
@@ -145,7 +153,7 @@ class hmm:
         # Find the state in last stage, giving maximum probability
         final_max = np.argmax(np.ravel(delta))
         best_path = old_path[:,final_max].tolist()
-        best_path_map = [ state_map[i] for i in best_path]
+        best_path_map = [ self.state_map[i] for i in best_path]
 
         return best_path_map, delta[0,final_max]
 
