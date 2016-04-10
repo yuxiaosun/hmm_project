@@ -11,6 +11,8 @@ class hmm:
         self.start_prob = start_prob
         self.trans_prob = trans_prob
         self.em_prob = em_prob
+
+        self.generate_obs_map()
         
         # Raise error if it is wrong data-type
         if(type(self.em_prob) != np.matrixlib.defmatrix.matrix):
@@ -82,6 +84,13 @@ class hmm:
         if (summation[0,0]!=1):
             raise ValueError("Probabilities entered for start state are invalid")
 
+    # ================ Generate Obs_map ===================
+
+    def generate_obs_map(self):
+        self.obs_map = {}
+        for i,o in enumerate(self.observations):
+            self.obs_map[o] = i
+
     # ================Viterbi ===================
     """
     Function returns the most likely path, and its associated probability
@@ -102,7 +111,7 @@ class hmm:
         # Find initial delta
         # Map observation to an index
         # delta[s] stores the probability of most probable path ending in state 's' 
-        ob_ind = obs_map[ observations[0] ]
+        ob_ind = self.obs_map[ observations[0] ]
         delta = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
          
         # initialize path
@@ -113,7 +122,7 @@ class hmm:
         for curr_t in range(1,total_stages):
 
             # Map observation to an index
-            ob_ind = obs_map[ observations[curr_t] ]
+            ob_ind = self.obs_map[ observations[curr_t] ]
             # Find temp and take max along each row to get delta
             temp  =  np.multiply (np.multiply(delta , self.trans_prob.transpose()) , self.em_prob[:, ob_ind] )
                 
@@ -150,19 +159,18 @@ class hmm:
     
 
     def forward_algo(self,observations):
-
         # Store total number of observations
         total_stages = len(observations)
 
         # Alpha[i] stores the probability of reaching state 'i' in stage 'j' where 'j' is the iteration number
 
         # Inittialize Alpha
-        ob_ind = obs_map[ observations[0] ]
+        ob_ind = self.obs_map[ observations[0] ]
         alpha = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
 
         # Iteratively find alpha(using knowledge of alpha in the previous stage)
         for curr_t in range(1,total_stages):
-            ob_ind = obs_map[observations[curr_t]]
+            ob_ind = self.obs_map[observations[curr_t]]
             alpha = np.dot( alpha , self.trans_prob)
             alpha = np.multiply( alpha , np.transpose( self.em_prob[:,ob_ind] ))
 
@@ -186,7 +194,7 @@ class hmm:
         total_stages = len(observations)
 
         # Initialize values
-        ob_ind = obs_map[ observations[0] ]
+        ob_ind = self.obs_map[ observations[0] ]
         alpha = np.asmatrix(np.zeros((num_states,total_stages)))
 
         # Handle alpha base case
@@ -194,7 +202,7 @@ class hmm:
 
         # Iteratively calculate alpha(t) for all 't'
         for curr_t in range(1,total_stages):
-            ob_ind = obs_map[observations[curr_t]]
+            ob_ind = self.obs_map[observations[curr_t]]
             alpha[:,curr_t] = np.dot( alpha[:,curr_t-1].transpose() , self.trans_prob).transpose()
             alpha[:,curr_t] = np.multiply( alpha[:,curr_t].transpose() , np.transpose( self.em_prob[:,ob_ind] )).transpose()
 
@@ -209,7 +217,7 @@ class hmm:
         total_stages = len(observations)
 
         # Initialize values
-        ob_ind = obs_map[ observations[total_stages-1] ]
+        ob_ind = self.obs_map[ observations[total_stages-1] ]
         beta = np.asmatrix(np.zeros((num_states,total_stages)))
 
         # Handle beta base case
@@ -217,7 +225,7 @@ class hmm:
 
         # Iteratively calculate beta(t) for all 't'
         for curr_t in range(total_stages-1,0,-1):
-            ob_ind = obs_map[observations[curr_t]]
+            ob_ind = self.obs_map[observations[curr_t]]
             beta[:,curr_t-1] = np.multiply( beta[:,curr_t] , self.em_prob[:,ob_ind] )
             beta[:,curr_t-1] = np.dot( self.trans_prob, beta[:,curr_t-1] )
 
@@ -253,7 +261,7 @@ class hmm:
         for i in range(self.em_prob.shape[1]):
             selectCols.append([])
         for i in range(len(observations)):
-            selectCols[ obs_map[observations[i]] ].append(i)
+            selectCols[ self.obs_map[observations[i]] ].append(i)
         
         # Calculate delta matrix
         delta = self.forward_backward(observations)
@@ -280,7 +288,7 @@ class hmm:
         for t in range(len(observations)-1):
             temp1 = np.multiply(alpha[:,t],beta[:,t+1].transpose())
             temp1 = np.multiply(self.trans_prob,temp1)
-            new_trans_prob = new_trans_prob + np.multiply(temp1,self.em_prob[:,obs_map[observations[t+1]]].transpose())
+            new_trans_prob = new_trans_prob + np.multiply(temp1,self.em_prob[:,self.obs_map[observations[t+1]]].transpose())
 
         # Normalize values so that sum of probabilities is 1
         for i in range(self.trans_prob.shape[0]):
@@ -292,31 +300,30 @@ class hmm:
         delta = self.forward_backward(observations)
         return delta[:,0].transpose()
             
-    def train_hmm(self,observation_list,iterations):
+    def train_hmm(self,observations,iterations):
 
-        emProbNew,transProbNew = self.em_prob,self.trans_prob
-        obs_size = len(observation_list)
+        eps = 0.001
+
+        emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
+        transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
+        startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
+        prob = - float('inf')
 
         # Train the model 'iteration' number of times
         # store em_prob and trans_prob copies since you should use same values for one loop
         for i in range(iterations):
 
-            wt = [self.forward_algo(observation_list[x]) for x in range(obs_size)]
-            wt = wt/sum(wt)
-            emProbNew = np.asmatrix(np.zeros((self.em_prob.shape)))
-            transProbNew = np.asmatrix(np.zeros((self.trans_prob.shape)))
-            startProbNew = np.asmatrix(np.zeros((self.start_prob.shape)))
-            
-
-            for j in range(obs_size):
-
-                emProbNew= emProbNew + wt[j] * self.train_emission(observation_list[j])
-                transProbNew = transProbNew + wt[j] * self.train_transition(observation_list[j])
-                startProbNew = startProbNew + wt[j] *self.train_start_prob(observation_list[j])
-                
+            emProbNew= self.train_emission(observations)
+            transProbNew = self.train_transition(observations)
+            startProbNew = self.train_start_prob(observations)
 
             self.em_prob,self.trans_prob = emProbNew,transProbNew
             self.start_prob = startProbNew
+
+            if(self.forward_algo(observations) - prob)>eps:
+                prob = self.forward_algo(observations)
+            else:
+                break
             
         return self.em_prob, self.trans_prob , self.start_prob
 
@@ -362,7 +369,6 @@ states = ('s1', 's2')
 #list of possible observations
 possible_observation = ('R','W', 'B')
 
-obs_map =  { 'R': 0 ,'W' : 1, 'B':2 }
 state_map = { 0 :'s1', 1: 's2' }
 
 # The observations that we observe and feed to the model
@@ -371,8 +377,6 @@ obs4 = ('R', 'R','W','B')
 obs3 = ('R', 'B','W','B')
 obs2 = ('R', 'W','B','R')
 
-observation_tuple = []
-observation_tuple.extend( [observations,obs3,obs4,obs2] )
 
 # Numpy arrays of the data
 start_probability = np.matrix( '0.8 0.2 ')
@@ -386,7 +390,6 @@ emission_probability = np.matrix( '0.3 0.4 0.3 ; 0.4  0.3  0.3 ' )
 # possible_observation = ('normal','cold', 'dizzy')
 # 
 # state_map = { 0 :'Healthy',1: 'Fever' }
-# obs_map =  { 'normal': 0 ,'cold' : 1, 'dizzy':2 }
 # 
 # # The observations that we observe and feed to the model
 # observations = ('normal', 'cold','dizzy')
@@ -408,8 +411,8 @@ print ("probability of sequence with original parameters : %f"%( np.sum(forward1
 
 num_iter=4
 print ("applied Baum welch on")
-print (observation_tuple)
-e,t,s = test.train_hmm(observation_tuple,num_iter)
+print (observations)
+e,t,s = test.train_hmm(observations,num_iter)
 forward1 = test.alpha_cal(observations)
 print("parameters emission,transition and start")
 print(e)
