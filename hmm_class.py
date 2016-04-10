@@ -4,7 +4,6 @@ class hmm:
 
 
     def __init__(self, states, observations, start_prob , trans_prob,  em_prob):
-        
         # start, em and trans_prob 
         self.states = states
         self.observations = observations
