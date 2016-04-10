@@ -406,23 +406,26 @@ emission_probability = np.matrix( '0.3 0.4 0.3 ; 0.4  0.3  0.3 ' )
 # transition_probability = np.matrix('0.7 0.3 ;  0.4 0.6 ')
 # emission_probability = np.matrix( '0.5 0.4 0.1 ; 0.1  0.3  0.6 ' )
 
-test = hmm(states,possible_observation,start_probability,transition_probability,emission_probability)
-print (test.viterbi(observations))
-print (test.forward_algo(observations))
+def test():
+    test = hmm(states,possible_observation,start_probability,transition_probability,emission_probability)
+    print (test.viterbi(observations))
+    print (test.forward_algo(observations))
 
-print ("")
+    print ("")
 
-# start_prob,em_prob,trans_prob=start_probability,emission_probability,transition_probability
-forward1 = test.alpha_cal(observations)
-print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
+    # start_prob,em_prob,trans_prob=start_probability,emission_probability,transition_probability
+    forward1 = test.alpha_cal(observations)
+    print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
 
-num_iter=40
-print ("applied Baum welch on")
-print (observation_tuple)
-e,t,s = test.train_hmm(observation_tuple,num_iter)
-forward1 = test.alpha_cal(observations)
-print("parameters emission,transition and start")
-print(e)
-print(t)
-print(s)
-print ("probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3])))
+    num_iter=40
+    print ("applied Baum welch on")
+    print (observation_tuple)
+    e,t,s = test.train_hmm(observation_tuple,num_iter)
+    forward1 = test.alpha_cal(observations)
+    print("parameters emission,transition and start")
+    print(e)
+    print(t)
+    print(s)
+    print ("probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3])))
+
+
