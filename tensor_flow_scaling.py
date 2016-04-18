@@ -1,3 +1,4 @@
+import tensorflow as tf
 import numpy as np
 
 class hmm:
@@ -81,6 +82,11 @@ class hmm:
         summation = np.sum(start_prob,axis=1)
         if (summation[0,0]!=1):
             raise ValueError("Probabilities entered for start state are invalid")
+
+        self.start_prob = tf.constant(start_prob)
+        self.trans_prob = tf.constant(trans_prob)
+        self.em_prob = tf.constant(em_prob)
+
     # ================ Generate Obs_map ===================
 
     def generate_state_map(self):
@@ -111,13 +117,13 @@ class hmm:
 
         # Inittialize Alpha
         ob_ind = self.obs_map[ observations[0] ]
-        alpha = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
+        alpha = tf.matmul ( tf.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
 
         # Iteratively find alpha(using knowledge of alpha in the previous stage)
         for curr_t in range(1,total_stages):
             ob_ind = self.obs_map[observations[curr_t]]
-            alpha = np.dot( alpha , self.trans_prob)
-            alpha = np.multiply( alpha , np.transpose( self.em_prob[:,ob_ind] ))
+            alpha = tf.mul( alpha , self.trans_prob)
+            alpha = tf.mul( alpha , np.transpose( self.em_prob[:,ob_ind] ))
 
         # Sum the alpha's over the last stage
         total_prob = alpha.sum()
@@ -138,17 +144,17 @@ class hmm:
 
         # initialize data
         # Path stores the state sequence giving maximum probability
-        old_path = np.zeros( (total_stages, num_states) )
-        new_path = np.zeros( (total_stages, num_states) )
+        old_path = tf.zeros( [total_stages, num_states] )
+        new_path = tf.zeros( [total_stages, num_states] )
 
         # Find initial delta
         # Map observation to an index
         # delta[s] stores the probability of most probable path ending in state 's' 
         ob_ind = self.obs_map[ observations[0] ]
-        delta = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
+        delta = tf.mul(tf.transpose(self.em_prob[:,ob_ind]) , self.start_prob )
 
         # Scale delta
-        delta = delta /np.sum(delta)
+        delta = delta /tf.sum(delta)
          
         # initialize path
         old_path[0,:] = [i for i in range(num_states) ]
@@ -160,16 +166,16 @@ class hmm:
             # Map observation to an index
             ob_ind = self.obs_map[ observations[curr_t] ]
             # Find temp and take max along each row to get delta
-            temp  =  np.multiply (np.multiply(delta , self.trans_prob.transpose()) , self.em_prob[:, ob_ind] )
+            temp  =  tf.mul (tf.mul(delta , self.trans_prob.transpose()) , self.em_prob[:, ob_ind] )
                 
             # Update delta and scale it
             delta = temp.max(axis = 1).transpose()
-            delta = delta /np.sum(delta)
+            delta = delta /tf.sum(delta)
 
             # Find state which is most probable using argax
             # Convert to a list for easier processing
             max_temp = temp.argmax(axis=1).transpose()
-            max_temp = np.ravel(max_temp).tolist()
+            max_temp = tf.ravel(max_temp).tolist()
 
             # Update path
             for s in range(num_states):
@@ -180,7 +186,7 @@ class hmm:
 
 
         # Find the state in last stage, giving maximum probability
-        final_max = np.argmax(np.ravel(delta))
+        final_max = tf.argmax(np.ravel(delta))
         best_path = old_path[:,final_max].tolist()
         best_path_map = [ state_map[i] for i in best_path]
 
@@ -200,19 +206,19 @@ class hmm:
 
         # Initialize values
         ob_ind = self.obs_map[ observations[0] ]
-        alpha = np.asmatrix(np.zeros((num_states,total_stages)))
-        c_scale = np.asmatrix(np.zeros((total_stages,1)))
+        alpha = tf.zeros([num_states,total_stages])
+        c_scale = tf.zeros([total_stages,1])
 
         # Handle alpha base case
-        alpha[:,0] = np.multiply ( np.transpose(self.em_prob[:,ob_ind]) , self.start_prob ).transpose()
+        alpha[:,0] = tf.transpose(tf.mul(tf.transpose(self.em_prob[:,ob_ind]) , self.start_prob ))
         # store scaling factors, scale alpha
-        c_scale[0,0] = 1/np.sum(alpha[:,0])
+        c_scale[0,0] = 1/tf.sum(alpha[:,0])
         alpha[:,0] = alpha[:,0] * c_scale[0]
         # Iteratively calculate alpha(t) for all 't'
         for curr_t in range(1,total_stages):
             ob_ind = self.obs_map[observations[curr_t]]
-            alpha[:,curr_t] = np.dot( alpha[:,curr_t-1].transpose() , self.trans_prob).transpose()
-            alpha[:,curr_t] = np.multiply( alpha[:,curr_t].transpose() , np.transpose( self.em_prob[:,ob_ind] )).transpose()
+            alpha[:,curr_t] = tf.matmul( alpha[:,curr_t-1].transpose() , self.trans_prob).transpose()
+            alpha[:,curr_t] = tf.mul( alpha[:,curr_t].transpose() , tf.transpose( self.em_prob[:,ob_ind] )).transpose()
 
             # Store scaling factors, scale alpha
             c_scale[curr_t] = 1/np.sum(alpha[:,curr_t])
@@ -229,7 +235,7 @@ class hmm:
 
         # Initialize values
         ob_ind = self.obs_map[ observations[total_stages-1] ]
-        beta = np.asmatrix(np.zeros((num_states,total_stages)))
+        beta = tf.zeros((num_states,total_stages))
 
         # Handle beta base case
         beta[:,total_stages-1] = c_scale[total_stages-1]
