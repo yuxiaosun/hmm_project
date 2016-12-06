@@ -69,7 +69,7 @@ class hmm:
         tmp1 = list (np.squeeze(np.asarray(summation)))
 
         #Compare
-        if(not np.isclose(tmp1, tmp2)):
+        if(not np.prod(np.isclose(tmp1, tmp2))):
             raise ValueError("Probabilities entered for emission matrix are invalid")
             
         # find summation of transition prob
@@ -77,7 +77,7 @@ class hmm:
         tmp1 = list (np.squeeze(np.asarray(summation)))
 
         #Compare
-        if(not np.isclose(tmp1, tmp2)):
+        if(not np.prod(np.isclose(tmp1, tmp2))):
             raise ValueError("Probabilities entered for transition matrix are invalid")
 
         summation = np.sum(start_prob,axis=1)
@@ -89,7 +89,7 @@ class hmm:
     def generate_state_map(self):
         self.state_map = {}
         for i,s in enumerate(self.states):
-            self.state_map[s] = i
+            self.state_map[i] = s
 
     # ================ Generate Obs_map ===================
 
@@ -152,7 +152,7 @@ class hmm:
         # Find the state in last stage, giving maximum probability
         final_max = np.argmax(np.ravel(delta))
         best_path = old_path[:,final_max].tolist()
-        best_path_map = [ self.state_map[i] for i in best_path]
+        best_path_map = [ self.state_map[int(i)] for i in best_path]
 
         return best_path_map, delta[0,final_max]
 
@@ -371,12 +371,12 @@ class hmm:
 
 states = ('s1', 's2')
 
-#list of possible observations
+#  list of possible observations
 possible_observation = ('R','W', 'B')
 
 state_map = { 0 :'s1', 1: 's2' }
 
-# The observations that we observe and feed to the model
+#  The observations that we observe and feed to the model
 observations = ('R', 'W','B','B')
 obs4 = ('W', 'R','W','B')
 obs3 = ('R', 'B','W','B')
@@ -385,26 +385,26 @@ obs2 = ('B', 'W','B','R')
 observation_tuple = []
 observation_tuple.extend( [observations,obs3,obs4,obs2] )
 
-# Numpy arrays of the data
+#  Numpy arrays of the data
 start_probability = np.matrix( '0.8 0.2 ')
 transition_probability = np.matrix('0.6 0.4 ;  0.3 0.7 ')
 emission_probability = np.matrix( '0.3 0.4 0.3 ; 0.4  0.3  0.3 ' )
 
 
-# states = ('Healthy', 'Fever')
-# 
-# #list of possible observations
-# possible_observation = ('normal','cold', 'dizzy')
-# 
-# state_map = { 0 :'Healthy',1: 'Fever' }
-# 
-# # The observations that we observe and feed to the model
-# observations = ('normal', 'cold','dizzy')
-# 
-# # Numpy arrays of the data
-# start_probability = np.matrix( '0.6 0.4 ')
-# transition_probability = np.matrix('0.7 0.3 ;  0.4 0.6 ')
-# emission_probability = np.matrix( '0.5 0.4 0.1 ; 0.1  0.3  0.6 ' )
+#  states = ('Healthy', 'Fever')
+
+#list of possible observations
+#  possible_observation = ('normal','cold', 'dizzy')
+
+#  state_map = { 0 :'Healthy',1: 'Fever' }
+
+# The observations that we observe and feed to the model
+#  observations = ('normal', 'cold','dizzy')
+
+# Numpy arrays of the data
+#  start_probability = np.matrix( '0.6 0.4 ')
+#  transition_probability = np.matrix('0.7 0.3 ;  0.4 0.6 ')
+#  emission_probability = np.matrix( '0.5 0.4 0.1 ; 0.1  0.3  0.6 ' )
 
 def test():
     test = hmm(states,possible_observation,start_probability,transition_probability,emission_probability)
@@ -415,9 +415,10 @@ def test():
 
     # start_prob,em_prob,trans_prob=start_probability,emission_probability,transition_probability
     forward1 = test.alpha_cal(observations)
-    print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
+    print(forward1)
+    #  print ("probability of sequence with original parameters : %f"%( np.sum(forward1[:,3])))
 
-    num_iter=40
+    num_iter=4
     print ("applied Baum welch on")
     print (observation_tuple)
     e,t,s = test.train_hmm(observation_tuple,num_iter)
@@ -427,5 +428,8 @@ def test():
     print(t)
     print(s)
     print ("probability of sequence after %d iterations : %f"%(num_iter,np.sum(forward1[:,3])))
+
+test()
+
 
 
