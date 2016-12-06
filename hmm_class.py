@@ -81,7 +81,7 @@ class hmm:
             raise ValueError("Probabilities entered for transition matrix are invalid")
 
         summation = np.sum(start_prob,axis=1)
-        if (summation[0,0]!=1):
+        if (not np.isclose(summation[0,0],1)):
             raise ValueError("Probabilities entered for start state are invalid")
 
     # ================ Generate State_map ===================
