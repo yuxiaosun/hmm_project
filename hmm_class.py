@@ -69,7 +69,7 @@ class hmm:
         tmp1 = list (np.squeeze(np.asarray(summation)))
 
         #Compare
-        if(tmp1 != tmp2):
+        if(not np.isclose(tmp1, tmp2)):
             raise ValueError("Probabilities entered for emission matrix are invalid")
             
         # find summation of transition prob
@@ -77,7 +77,7 @@ class hmm:
         tmp1 = list (np.squeeze(np.asarray(summation)))
 
         #Compare
-        if(tmp1 != tmp2):
+        if(not np.isclose(tmp1, tmp2)):
             raise ValueError("Probabilities entered for transition matrix are invalid")
 
         summation = np.sum(start_prob,axis=1)
